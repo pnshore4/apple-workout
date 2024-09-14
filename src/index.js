@@ -43,7 +43,19 @@ document.getElementById('processButton').addEventListener('click', () => {
 });
 
 function cleanUpValue(value) {
-  return value.replace(/[^\d:.'"/a-zA-Z]/g, '').replace('PM', 'BPM');
+  // Remove unwanted characters
+  let cleanedValue = value.replace(/[^\d:.'"/a-zA-Z]/g, '').replace('PM', 'BPM');
+
+  // Handle heart rate: If it's a number and greater than 3 digits, shorten it
+  if (cleanedValue.includes('BPM')) {
+    const heartRate = cleanedValue.replace('BPM', '').trim();
+    // Ensure heart rate is 3 digits and within a reasonable range
+    if (heartRate.length > 3 || heartRate > 250) {
+      cleanedValue = heartRate.slice(0, 3) + 'BPM';
+    }
+  }
+
+  return cleanedValue;
 }
 
 function parseWorkoutData(text) {
@@ -126,7 +138,16 @@ function parseWorkoutData(text) {
 }
 
 function sendDataToGoogleSheet(data) {
+  const googleSheetInput = document.getElementById('googleSheetInput').value;
   const scriptURL = 'https://script.google.com/macros/s/AKfycbyR8YTU_a_NdMD3axJadZfzZPsFT4mFhmY1bKPlWOx8e_6nZg85-Z1RKa-ZRPVQo3lL/exec'; // Replace with your Apps Script URL
+
+  // If user provides a Google Sheet ID or URL, extract the ID and update the scriptURL
+  if (googleSheetInput) {
+    const sheetId = googleSheetInput.match(/[-\w]{25,}/); // Extracts the sheet ID from the URL or uses it as is
+    if (sheetId) {
+      scriptURL = `https://script.google.com/macros/s/YOUR_DYNAMIC_SCRIPT_ID/exec?sheetId=${sheetId[0]}`;
+    }
+  }
 
   console.log('Sending request to:', scriptURL);
 
@@ -136,7 +157,6 @@ function sendDataToGoogleSheet(data) {
   fetch(scriptURL, {
     method: 'POST',
     body: formData.toString(),
-    redirect: "follow",
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
