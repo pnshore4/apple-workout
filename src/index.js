@@ -145,7 +145,7 @@ function sendDataToGoogleSheet(data) {
   if (googleSheetInput) {
     const sheetId = googleSheetInput.match(/[-\w]{25,}/); // Extracts the sheet ID from the URL or uses it as is
     if (sheetId) {
-      scriptURL = `https://script.google.com/macros/s/YOUR_DYNAMIC_SCRIPT_ID/exec?sheetId=${sheetId[0]}`;
+      scriptURL = `https://script.google.com/macros/s/AKfycbyR8YTU_a_NdMD3axJadZfzZPsFT4mFhmY1bKPlWOx8e_6nZg85-Z1RKa-ZRPVQo3lL/exec?sheetId=${sheetId[0]}`;
     }
   }
 
