@@ -1,58 +1,75 @@
 function doPost(e) {
-    var output = ContentService.createTextOutput();
-    var data;
+    return handleRequest(e);
+  }
   
-    try {
-        data = JSON.parse(e.postData.contents);
-    } catch (error) {
-        output.setContent(JSON.stringify({ status: 'error', message: 'Invalid JSON data' }));
-        return output;
+  function handleRequest(e) {
+    var output = ContentService.createTextOutput();
+    var data = {};
+  
+    // Parse data from POST parameters
+    if (e.parameter && e.parameter.data) {
+      try {
+        data = JSON.parse(e.parameter.data);
+      } catch (error) {
+        console.error('Error parsing data from parameters:', error);
+      }
     }
-
-    try {
-        var ss = SpreadsheetApp.getActiveSpreadsheet();
-        var sheet = ss.getSheetByName('Workouts') || ss.insertSheet('Workouts');
-        
-        // Get the next available column
-        var lastColumn = sheet.getLastColumn();
-        var nextColumn = lastColumn + 1;
-        
-        // Prepare the data for insertion
-        var columnData = [
-            new Date(), // Date
-            data.workoutDetails.time || '',
-            data.workoutDetails.distance || '',
-            data.workoutDetails.activeCalories || '',
-            data.workoutDetails.totalCalories || '',
-            data.workoutDetails.elevationGain || '',
-            data.workoutDetails.avgPower || '',
-            data.workoutDetails.avgCadence || '',
-            data.workoutDetails.avgPace || '',
-            data.workoutDetails.avgHeartRate || ''
+  
+    if (data.workoutDetails) {
+      try {
+        const ss = SpreadsheetApp.openById('1XULnWjy9I6kYuqh2ttPBFIzKr_swWJ91nTJy8wFOkls'); // Replace with your Spreadsheet ID
+        const detailsSheet = ss.getSheetByName('WorkoutDetails'); // Sheet for workout details
+        const splitsSheet = ss.getSheetByName('Splits'); // Sheet for splits
+  
+        // Insert workout details
+        const workoutDetails = data.workoutDetails;
+        const detailsRow = [
+          new Date(), // Timestamp
+          workoutDetails.time || '234',
+          workoutDetails.distance || '',
+          workoutDetails.activeCalories || '',
+          workoutDetails.totalCalories || '',
+          workoutDetails.elevationGain || '',
+          workoutDetails.avgPower || '',
+          workoutDetails.avgCadence || '',
+          workoutDetails.avgPace || '',
+          workoutDetails.avgHeartRate || ''
         ];
-
-        // Add splits data
+        detailsSheet.appendRow(detailsRow);
+  
+        // Insert splits if available
         if (data.splits && data.splits.length > 0) {
-            data.splits.forEach(split => {
-                columnData.push(split.splitNumber || '');
-                columnData.push(split.time || '');
-                columnData.push(split.pace || '');
-                columnData.push(split.heartRate || '');
-            });
+          // Optionally, add a header or separator between entries
+          splitsSheet.appendRow(['Timestamp', 'Split Number', 'Time', 'Pace', 'Heart Rate']);
+  
+          data.splits.forEach(split => {
+            splitsSheet.appendRow([
+              new Date(),
+              split.splitNumber || '',
+              split.time || '',
+              split.pace || '',
+              split.heartRate || ''
+            ]);
+          });
         }
-
-        // Insert the data as a new column
-        sheet.getRange(1, nextColumn, columnData.length, 1).setValues(columnData.map(item => [item]));
-
-        output.setContent(JSON.stringify({ status: 'success', message: 'Data inserted successfully' }));
-    } catch (error) {
-        output.setContent(JSON.stringify({ status: 'error', message: error.toString() }));
+  
+        var response = { status: 'success', message: 'Data processed successfully' };
+        output.setContent(JSON.stringify(response));
+      } catch (error) {
+        console.error('Error processing data:', error);
+        var response = { status: 'error', message: error.toString() };
+        output.setContent(JSON.stringify(response));
+      }
+    } else {
+      var response = { status: 'error', message: 'Invalid request: No data provided' };
+      output.setContent(JSON.stringify(response));
     }
-
+  
     output.setMimeType(ContentService.MimeType.JSON);
+  
+    // Set CORS headers
+    output.appendHeader('Access-Control-Allow-Origin', '*');
+  
     return output;
-}
-
-function doGet(e) {
-    return doPost(e);
-}
+  }
+  

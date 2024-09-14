@@ -139,13 +139,13 @@ function parseWorkoutData(text) {
 
 function sendDataToGoogleSheet(data) {
   const googleSheetInput = document.getElementById('googleSheetInput').value;
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbwXarIEq8C-xfZPxKMKW6QafEt3htTHhhXYo5r1w_EIQEVUXBmsSdnySF55sR4GLvLm/exec'; // Replace with your Apps Script URL
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbyyqX7FzRNhPbUKA0iFwFJ5AtMca3r6_EKrR4nw5BGo43qpiUMOLEubrCEC7-5rzie9/exec'; // Replace with your Apps Script URL
 
   // If user provides a Google Sheet ID or URL, extract the ID and update the scriptURL
   if (googleSheetInput) {
     const sheetId = googleSheetInput.match(/[-\w]{25,}/); // Extracts the sheet ID from the URL or uses it as is
     if (sheetId) {
-      scriptURL = `https://script.google.com/macros/s/AKfycbwXarIEq8C-xfZPxKMKW6QafEt3htTHhhXYo5r1w_EIQEVUXBmsSdnySF55sR4GLvLm/exec?sheetId=${sheetId[0]}`;
+      scriptURL = 'https://script.google.com/macros/s/AKfycbyyqX7FzRNhPbUKA0iFwFJ5AtMca3r6_EKrR4nw5BGo43qpiUMOLEubrCEC7-5rzie9/exec?sheetId=${sheetId[0]}';
     }
   }
 
